@@ -16,7 +16,7 @@ A minimalist, local-first TUI for tracking daily habits. Built with Go and [Bubb
 ### Using Go (Recommended)
 
 ```bash
-go install github.com/vl/habit-cli/cmd/hbt@latest
+go install github.com/vittolewerissa/habit-cli/cmd/hbt@latest
 ```
 
 Then run:
@@ -27,7 +27,7 @@ hbt
 ### From Source
 
 ```bash
-git clone https://github.com/vl/habit-cli.git
+git clone https://github.com/vittolewerissa/habit-cli.git
 cd habit-cli
 go build -o hbt ./cmd/hbt
 ./hbt

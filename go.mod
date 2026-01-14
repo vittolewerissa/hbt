@@ -1,4 +1,4 @@
-module github.com/vl/habit-cli
+module github.com/vittolewerissa/habit-cli
 
 go 1.25.5
 

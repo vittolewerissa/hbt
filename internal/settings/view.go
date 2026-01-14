@@ -5,8 +5,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vl/habit-cli/internal/shared/db"
-	"github.com/vl/habit-cli/internal/shared/ui"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/ui"
 )
 
 // Model is the settings tab model

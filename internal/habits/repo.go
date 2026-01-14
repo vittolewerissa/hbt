@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/vl/habit-cli/internal/shared/db"
-	"github.com/vl/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/model"
 )
 
 // Repository handles habit database operations

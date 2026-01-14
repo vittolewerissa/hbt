@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vl/habit-cli/internal/shared/ui"
+	"github.com/vittolewerissa/habit-cli/internal/shared/ui"
 )
 
 // BarChart renders a horizontal bar chart

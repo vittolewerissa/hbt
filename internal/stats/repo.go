@@ -3,7 +3,7 @@ package stats
 import (
 	"time"
 
-	"github.com/vl/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
 )
 
 // Repository handles statistics database operations

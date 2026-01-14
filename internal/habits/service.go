@@ -1,8 +1,8 @@
 package habits
 
 import (
-	"github.com/vl/habit-cli/internal/shared/db"
-	"github.com/vl/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/model"
 )
 
 // Service handles habit business logic

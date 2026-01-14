@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"github.com/vl/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
 )
 
 // Service handles settings management

@@ -6,10 +6,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vl/habit-cli/internal/category"
-	"github.com/vl/habit-cli/internal/shared/db"
-	"github.com/vl/habit-cli/internal/shared/model"
-	"github.com/vl/habit-cli/internal/shared/ui"
+	"github.com/vittolewerissa/habit-cli/internal/category"
+	"github.com/vittolewerissa/habit-cli/internal/shared/db"
+	"github.com/vittolewerissa/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/habit-cli/internal/shared/ui"
 )
 
 // View modes
