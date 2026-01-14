@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/vittolewerissa/habit-cli/internal/shared/db"
-	"github.com/vittolewerissa/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/hbt/internal/shared/db"
+	"github.com/vittolewerissa/hbt/internal/shared/model"
 )
 
 // Service handles today's habits logic

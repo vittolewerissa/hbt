@@ -3,8 +3,8 @@ package today
 import (
 	"time"
 
-	"github.com/vittolewerissa/habit-cli/internal/shared/db"
-	"github.com/vittolewerissa/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/hbt/internal/shared/db"
+	"github.com/vittolewerissa/hbt/internal/shared/model"
 )
 
 // Repository handles completion database operations

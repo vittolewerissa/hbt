@@ -6,8 +6,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vittolewerissa/habit-cli/internal/shared/model"
-	"github.com/vittolewerissa/habit-cli/internal/shared/ui"
+	"github.com/vittolewerissa/hbt/internal/shared/model"
+	"github.com/vittolewerissa/hbt/internal/shared/ui"
 )
 
 // FormField represents a form field

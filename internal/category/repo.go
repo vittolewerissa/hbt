@@ -3,8 +3,8 @@ package category
 import (
 	"database/sql"
 
-	"github.com/vittolewerissa/habit-cli/internal/shared/db"
-	"github.com/vittolewerissa/habit-cli/internal/shared/model"
+	"github.com/vittolewerissa/hbt/internal/shared/db"
+	"github.com/vittolewerissa/hbt/internal/shared/model"
 )
 
 // Repository handles category database operations

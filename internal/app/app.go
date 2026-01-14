@@ -5,11 +5,11 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/vittolewerissa/habit-cli/internal/habits"
-	"github.com/vittolewerissa/habit-cli/internal/shared/db"
-	"github.com/vittolewerissa/habit-cli/internal/shared/ui"
-	"github.com/vittolewerissa/habit-cli/internal/stats"
-	"github.com/vittolewerissa/habit-cli/internal/today"
+	"github.com/vittolewerissa/hbt/internal/habits"
+	"github.com/vittolewerissa/hbt/internal/shared/db"
+	"github.com/vittolewerissa/hbt/internal/shared/ui"
+	"github.com/vittolewerissa/hbt/internal/stats"
+	"github.com/vittolewerissa/hbt/internal/today"
 )
 
 // Tab represents a tab in the application

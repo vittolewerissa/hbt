@@ -1,4 +1,4 @@
-module github.com/vittolewerissa/habit-cli
+module github.com/vittolewerissa/hbt
 
 go 1.25.5
 

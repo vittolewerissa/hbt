@@ -1,8 +1,8 @@
 package stats
 
 import (
-	"github.com/vittolewerissa/habit-cli/internal/shared/db"
-	"github.com/vittolewerissa/habit-cli/internal/today"
+	"github.com/vittolewerissa/hbt/internal/shared/db"
+	"github.com/vittolewerissa/hbt/internal/today"
 )
 
 // Service handles statistics business logic
