@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/hbt-banner.png" alt="hbt banner" width="100%">
+  <img src="public/hbt_banner.png" alt="hbt banner" width="100%">
 </p>
 
 <p align="center">
