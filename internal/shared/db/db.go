@@ -48,8 +48,16 @@ func Open(path string) (*DB, error) {
 
 // migrate runs the schema migrations
 func migrate(db *sql.DB) error {
-	_, err := db.Exec(schema)
-	return err
+	// Run main schema
+	if _, err := db.Exec(schema); err != nil {
+		return err
+	}
+
+	// Add emoji column if it doesn't exist (for existing databases)
+	// This will fail silently if the column already exists
+	_, _ = db.Exec("ALTER TABLE categories ADD COLUMN emoji TEXT DEFAULT '📁'")
+
+	return nil
 }
 
 // DefaultPath returns the default database path

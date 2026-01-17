@@ -29,10 +29,11 @@ func (s *Service) Get(id int64) (*model.Category, error) {
 
 // Create creates a new category
 func (s *Service) Create(c *model.Category) error {
-	// Set default color if not provided
+	// Set default color if not provided (kept for DB compatibility)
 	if c.Color == "" {
-		c.Color = model.DefaultColors[0]
+		c.Color = "#CCCCCC"
 	}
+	// Emoji is optional - allow empty string
 	return s.repo.Create(c)
 }
 

@@ -19,7 +19,7 @@ func NewRepository(database *db.DB) *Repository {
 
 // List returns all categories
 func (r *Repository) List() ([]model.Category, error) {
-	query := `SELECT id, name, color, created_at FROM categories ORDER BY name`
+	query := `SELECT id, name, color, emoji, created_at FROM categories ORDER BY name`
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (r *Repository) List() ([]model.Category, error) {
 	var categories []model.Category
 	for rows.Next() {
 		var c model.Category
-		if err := rows.Scan(&c.ID, &c.Name, &c.Color, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.Name, &c.Color, &c.Emoji, &c.CreatedAt); err != nil {
 			return nil, err
 		}
 		categories = append(categories, c)
@@ -39,9 +39,9 @@ func (r *Repository) List() ([]model.Category, error) {
 
 // GetByID returns a category by ID
 func (r *Repository) GetByID(id int64) (*model.Category, error) {
-	query := `SELECT id, name, color, created_at FROM categories WHERE id = ?`
+	query := `SELECT id, name, color, emoji, created_at FROM categories WHERE id = ?`
 	var c model.Category
-	err := r.db.QueryRow(query, id).Scan(&c.ID, &c.Name, &c.Color, &c.CreatedAt)
+	err := r.db.QueryRow(query, id).Scan(&c.ID, &c.Name, &c.Color, &c.Emoji, &c.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -53,8 +53,8 @@ func (r *Repository) GetByID(id int64) (*model.Category, error) {
 
 // Create creates a new category
 func (r *Repository) Create(c *model.Category) error {
-	query := `INSERT INTO categories (name, color) VALUES (?, ?)`
-	result, err := r.db.Exec(query, c.Name, c.Color)
+	query := `INSERT INTO categories (name, color, emoji) VALUES (?, ?, ?)`
+	result, err := r.db.Exec(query, c.Name, c.Color, c.Emoji)
 	if err != nil {
 		return err
 	}
@@ -68,8 +68,8 @@ func (r *Repository) Create(c *model.Category) error {
 
 // Update updates an existing category
 func (r *Repository) Update(c *model.Category) error {
-	query := `UPDATE categories SET name = ?, color = ? WHERE id = ?`
-	_, err := r.db.Exec(query, c.Name, c.Color, c.ID)
+	query := `UPDATE categories SET name = ?, color = ?, emoji = ? WHERE id = ?`
+	_, err := r.db.Exec(query, c.Name, c.Color, c.Emoji, c.ID)
 	return err
 }
 

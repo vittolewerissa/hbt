@@ -196,9 +196,9 @@ func (m Model) renderHabit(index int, habit HabitWithStatus) string {
 		line += ui.StreakBadge.Render(streak)
 	}
 
-	// Add category tag
-	if habit.Category != nil {
-		line += " " + ui.CategoryTag(habit.Category.Name, habit.Category.Color)
+	// Add category emoji (optional)
+	if habit.Category != nil && habit.Category.Emoji != "" {
+		line += " " + habit.Category.Emoji
 	}
 
 	// Add frequency info for non-daily habits

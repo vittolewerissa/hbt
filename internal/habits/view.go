@@ -281,8 +281,9 @@ func (m Model) renderListContent() string {
 
 		line := fmt.Sprintf("%s%s %s", cursor, name, ui.MutedText.Render(freq))
 
-		if habit.Category != nil {
-			line += " " + ui.CategoryTag(habit.Category.Name, habit.Category.Color)
+		if habit.Category != nil && habit.Category.Emoji != "" {
+			// Use custom emoji from category (optional)
+			line += " " + habit.Category.Emoji
 		}
 
 		s += line + "\n"
