@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS habits (
     category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
     frequency_type TEXT NOT NULL DEFAULT 'daily',
     frequency_value INTEGER DEFAULT 1,
+    target_per_day INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     archived_at DATETIME
 );
@@ -25,8 +26,7 @@ CREATE TABLE IF NOT EXISTS completions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     habit_id INTEGER NOT NULL REFERENCES habits(id) ON DELETE CASCADE,
     completed_at DATE NOT NULL,
-    notes TEXT DEFAULT '',
-    UNIQUE(habit_id, completed_at)
+    notes TEXT DEFAULT ''
 );
 
 -- App settings

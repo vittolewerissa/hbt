@@ -19,6 +19,7 @@ const (
 	fieldEmoji
 	fieldFrequency
 	fieldFrequencyValue
+	fieldTargetPerDay
 	fieldCategory
 )
 
@@ -30,6 +31,7 @@ type FormModel struct {
 	descInput          textinput.Model
 	emojiSearch        textinput.Model
 	freqValueInput     textinput.Model
+	targetPerDayInput  textinput.Model
 	focusedField       FormField
 	frequencyType      model.FrequencyType
 	selectedEmoji      string
@@ -64,21 +66,27 @@ func NewForm(habit *model.Habit, categories []model.Category, width, height int)
 	freqValueInput.CharLimit = 2
 	freqValueInput.Width = 10
 
+	targetPerDayInput := textinput.New()
+	targetPerDayInput.Placeholder = "Target per day"
+	targetPerDayInput.CharLimit = 2
+	targetPerDayInput.Width = 10
+
 	emojiSearch := textinput.New()
 	emojiSearch.Placeholder = "Search emojis..."
 	emojiSearch.CharLimit = 50
 	emojiSearch.Width = 30
 
 	m := &FormModel{
-		categories:     categories,
-		nameInput:      nameInput,
-		descInput:      descInput,
-		emojiSearch:    emojiSearch,
-		freqValueInput: freqValueInput,
-		frequencyType:  model.FreqDaily,
-		categoryIndex:  -1,
-		width:          width,
-		height:         height,
+		categories:        categories,
+		nameInput:         nameInput,
+		descInput:         descInput,
+		emojiSearch:       emojiSearch,
+		freqValueInput:    freqValueInput,
+		targetPerDayInput: targetPerDayInput,
+		frequencyType:     model.FreqDaily,
+		categoryIndex:     -1,
+		width:             width,
+		height:            height,
 	}
 
 	if habit != nil {
@@ -89,6 +97,11 @@ func NewForm(habit *model.Habit, categories []model.Category, width, height int)
 		m.selectedEmoji = habit.Emoji
 		m.frequencyType = habit.FrequencyType
 		m.freqValueInput.SetValue(fmt.Sprintf("%d", habit.FrequencyValue))
+		if habit.TargetPerDay > 0 {
+			m.targetPerDayInput.SetValue(fmt.Sprintf("%d", habit.TargetPerDay))
+		} else {
+			m.targetPerDayInput.SetValue("1")
+		}
 
 		if habit.CategoryID != nil {
 			for i, c := range categories {
@@ -101,6 +114,7 @@ func NewForm(habit *model.Habit, categories []model.Category, width, height int)
 	} else {
 		m.habit = &model.Habit{}
 		m.freqValueInput.SetValue("3")
+		m.targetPerDayInput.SetValue("1")
 	}
 
 	return m
@@ -327,6 +341,8 @@ func (m *FormModel) Update(msg tea.Msg) (FormModel, tea.Cmd) {
 		m.descInput, cmd = m.descInput.Update(msg)
 	case fieldFrequencyValue:
 		m.freqValueInput, cmd = m.freqValueInput.Update(msg)
+	case fieldTargetPerDay:
+		m.targetPerDayInput, cmd = m.targetPerDayInput.Update(msg)
 	}
 
 	return *m, cmd
@@ -336,6 +352,7 @@ func (m *FormModel) nextField() {
 	m.nameInput.Blur()
 	m.descInput.Blur()
 	m.freqValueInput.Blur()
+	m.targetPerDayInput.Blur()
 
 	m.focusedField++
 	if m.focusedField == fieldFrequencyValue && m.frequencyType != model.FreqTimesPerWeek {
@@ -352,6 +369,8 @@ func (m *FormModel) nextField() {
 		m.descInput.Focus()
 	case fieldFrequencyValue:
 		m.freqValueInput.Focus()
+	case fieldTargetPerDay:
+		m.targetPerDayInput.Focus()
 	}
 }
 
@@ -359,6 +378,7 @@ func (m *FormModel) prevField() {
 	m.nameInput.Blur()
 	m.descInput.Blur()
 	m.freqValueInput.Blur()
+	m.targetPerDayInput.Blur()
 
 	m.focusedField--
 	if m.focusedField == fieldFrequencyValue && m.frequencyType != model.FreqTimesPerWeek {
@@ -375,6 +395,8 @@ func (m *FormModel) prevField() {
 		m.descInput.Focus()
 	case fieldFrequencyValue:
 		m.freqValueInput.Focus()
+	case fieldTargetPerDay:
+		m.targetPerDayInput.Focus()
 	}
 }
 
@@ -422,6 +444,17 @@ func (m *FormModel) GetHabit() *model.Habit {
 		m.habit.FrequencyValue = 1
 	}
 
+	// Parse target per day
+	var targetPerDay int
+	fmt.Sscanf(m.targetPerDayInput.Value(), "%d", &targetPerDay)
+	if targetPerDay < 1 {
+		targetPerDay = 1
+	}
+	if targetPerDay > 99 {
+		targetPerDay = 99
+	}
+	m.habit.TargetPerDay = targetPerDay
+
 	if m.categoryIndex >= 0 && m.categoryIndex < len(m.categories) {
 		id := m.categories[m.categoryIndex].ID
 		m.habit.CategoryID = &id
@@ -467,6 +500,9 @@ func (m *FormModel) ViewContent() string {
 	if m.frequencyType == model.FreqTimesPerWeek {
 		s += m.renderField("Times/Week", m.freqValueInput.View(), m.focusedField == fieldFrequencyValue)
 	}
+
+	// Target per day field
+	s += m.renderField("Target/Day", m.targetPerDayInput.View(), m.focusedField == fieldTargetPerDay)
 
 	// Category field
 	catDisplay := m.renderCategorySelector(m.focusedField == fieldCategory)

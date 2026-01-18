@@ -167,9 +167,12 @@ func (m Model) renderHabit(index int, habit HabitWithStatus) string {
 		cursor = "> "
 	}
 
-	// Checkbox
+	// Checkbox or progress indicator
 	checkbox := "[ ]"
-	if habit.CompletedToday {
+	if habit.TargetPerDay > 1 {
+		// Show progress for multi-completion habits
+		checkbox = fmt.Sprintf("[%d/%d]", habit.CompletionsToday, habit.TargetPerDay)
+	} else if habit.CompletedToday {
 		checkbox = "[x]"
 	}
 

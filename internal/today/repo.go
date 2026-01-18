@@ -19,24 +19,37 @@ func NewRepository(database *db.DB) *Repository {
 
 // IsCompletedOn checks if a habit is completed on a specific date
 func (r *Repository) IsCompletedOn(habitID int64, date time.Time) (bool, error) {
+	count, err := r.CountCompletionsOn(habitID, date)
+	return count > 0, err
+}
+
+// CountCompletionsOn returns the number of completions for a habit on a specific date
+func (r *Repository) CountCompletionsOn(habitID int64, date time.Time) (int, error) {
 	query := `SELECT COUNT(*) FROM completions WHERE habit_id = ? AND completed_at = ?`
 	dateStr := date.Format("2006-01-02")
 	var count int
 	err := r.db.QueryRow(query, habitID, dateStr).Scan(&count)
-	return count > 0, err
+	return count, err
 }
 
-// Complete marks a habit as completed for a date
+// Complete marks a habit as completed for a date (adds one completion)
+// Note: Uses INSERT (not INSERT OR REPLACE) to allow multiple completions per day
+// For databases created before this feature, the UNIQUE constraint may still exist
+// and will cause an error on duplicate completions - this is expected behavior
 func (r *Repository) Complete(habitID int64, date time.Time, notes string) error {
-	query := `INSERT OR REPLACE INTO completions (habit_id, completed_at, notes) VALUES (?, ?, ?)`
+	query := `INSERT INTO completions (habit_id, completed_at, notes) VALUES (?, ?, ?)`
 	dateStr := date.Format("2006-01-02")
 	_, err := r.db.Exec(query, habitID, dateStr, notes)
 	return err
 }
 
-// Uncomplete removes a completion for a date
+// Uncomplete removes one completion for a date (removes the most recent one)
 func (r *Repository) Uncomplete(habitID int64, date time.Time) error {
-	query := `DELETE FROM completions WHERE habit_id = ? AND completed_at = ?`
+	query := `DELETE FROM completions WHERE id = (
+		SELECT id FROM completions
+		WHERE habit_id = ? AND completed_at = ?
+		ORDER BY id DESC LIMIT 1
+	)`
 	dateStr := date.Format("2006-01-02")
 	_, err := r.db.Exec(query, habitID, dateStr)
 	return err

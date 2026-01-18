@@ -20,14 +20,16 @@ type Habit struct {
 	CategoryID     *int64
 	FrequencyType  FrequencyType
 	FrequencyValue int // times per week if FrequencyType is times_per_week
+	TargetPerDay   int // how many times to complete per day
 	CreatedAt      time.Time
 	ArchivedAt     *time.Time
 
 	// Joined fields (not stored directly)
-	Category       *Category
-	CurrentStreak  int
-	BestStreak     int
-	CompletedToday bool
+	Category           *Category
+	CurrentStreak      int
+	BestStreak         int
+	CompletionsToday   int  // how many times completed today
+	CompletedToday     bool // deprecated: use CompletionsToday >= TargetPerDay
 }
 
 // IsArchived returns true if the habit has been archived

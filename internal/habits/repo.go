@@ -22,7 +22,7 @@ func NewRepository(database *db.DB) *Repository {
 func (r *Repository) List() ([]model.Habit, error) {
 	query := `
 		SELECT h.id, h.name, h.description, h.emoji, h.category_id, h.frequency_type,
-		       h.frequency_value, h.created_at, h.archived_at,
+		       h.frequency_value, h.target_per_day, h.created_at, h.archived_at,
 		       c.id, c.name, c.color, c.emoji
 		FROM habits h
 		LEFT JOIN categories c ON h.category_id = c.id
@@ -36,7 +36,7 @@ func (r *Repository) List() ([]model.Habit, error) {
 func (r *Repository) ListAll() ([]model.Habit, error) {
 	query := `
 		SELECT h.id, h.name, h.description, h.emoji, h.category_id, h.frequency_type,
-		       h.frequency_value, h.created_at, h.archived_at,
+		       h.frequency_value, h.target_per_day, h.created_at, h.archived_at,
 		       c.id, c.name, c.color, c.emoji
 		FROM habits h
 		LEFT JOIN categories c ON h.category_id = c.id
@@ -49,7 +49,7 @@ func (r *Repository) ListAll() ([]model.Habit, error) {
 func (r *Repository) GetByID(id int64) (*model.Habit, error) {
 	query := `
 		SELECT h.id, h.name, h.description, h.emoji, h.category_id, h.frequency_type,
-		       h.frequency_value, h.created_at, h.archived_at,
+		       h.frequency_value, h.target_per_day, h.created_at, h.archived_at,
 		       c.id, c.name, c.color, c.emoji
 		FROM habits h
 		LEFT JOIN categories c ON h.category_id = c.id
@@ -68,10 +68,10 @@ func (r *Repository) GetByID(id int64) (*model.Habit, error) {
 // Create creates a new habit
 func (r *Repository) Create(h *model.Habit) error {
 	query := `
-		INSERT INTO habits (name, description, emoji, category_id, frequency_type, frequency_value)
-		VALUES (?, ?, ?, ?, ?, ?)
+		INSERT INTO habits (name, description, emoji, category_id, frequency_type, frequency_value, target_per_day)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
-	result, err := r.db.Exec(query, h.Name, h.Description, h.Emoji, h.CategoryID, h.FrequencyType, h.FrequencyValue)
+	result, err := r.db.Exec(query, h.Name, h.Description, h.Emoji, h.CategoryID, h.FrequencyType, h.FrequencyValue, h.TargetPerDay)
 	if err != nil {
 		return err
 	}
@@ -88,10 +88,10 @@ func (r *Repository) Create(h *model.Habit) error {
 func (r *Repository) Update(h *model.Habit) error {
 	query := `
 		UPDATE habits
-		SET name = ?, description = ?, emoji = ?, category_id = ?, frequency_type = ?, frequency_value = ?
+		SET name = ?, description = ?, emoji = ?, category_id = ?, frequency_type = ?, frequency_value = ?, target_per_day = ?
 		WHERE id = ?
 	`
-	_, err := r.db.Exec(query, h.Name, h.Description, h.Emoji, h.CategoryID, h.FrequencyType, h.FrequencyValue, h.ID)
+	_, err := r.db.Exec(query, h.Name, h.Description, h.Emoji, h.CategoryID, h.FrequencyType, h.FrequencyValue, h.TargetPerDay, h.ID)
 	return err
 }
 
@@ -132,7 +132,7 @@ func (r *Repository) queryHabits(query string, args ...interface{}) ([]model.Hab
 
 		err := rows.Scan(
 			&h.ID, &h.Name, &h.Description, &h.Emoji, &categoryID, &h.FrequencyType,
-			&h.FrequencyValue, &h.CreatedAt, &archivedAt,
+			&h.FrequencyValue, &h.TargetPerDay, &h.CreatedAt, &archivedAt,
 			&catID, &catName, &catColor, &catEmoji,
 		)
 		if err != nil {

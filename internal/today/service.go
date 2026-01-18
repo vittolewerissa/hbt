@@ -25,7 +25,8 @@ func NewService(database *db.DB) *Service {
 // HabitWithStatus contains a habit with its completion status
 type HabitWithStatus struct {
 	model.Habit
-	CompletedToday      bool
+	CompletedToday      bool // deprecated: use CompletionsToday >= TargetPerDay
+	CompletionsToday    int
 	CurrentStreak       int
 	BestStreak          int
 	CompletionsThisWeek int
@@ -36,9 +37,9 @@ type HabitWithStatus struct {
 func (s *Service) GetHabitsForToday() ([]HabitWithStatus, error) {
 	// Get all active habits
 	query := `
-		SELECT h.id, h.name, h.description, h.category_id, h.frequency_type,
-		       h.frequency_value, h.created_at, h.archived_at,
-		       c.id, c.name, c.color
+		SELECT h.id, h.name, h.description, h.emoji, h.category_id, h.frequency_type,
+		       h.frequency_value, h.target_per_day, h.created_at, h.archived_at,
+		       c.id, c.name, c.color, c.emoji
 		FROM habits h
 		LEFT JOIN categories c ON h.category_id = c.id
 		WHERE h.archived_at IS NULL
@@ -56,13 +57,13 @@ func (s *Service) GetHabitsForToday() ([]HabitWithStatus, error) {
 	for rows.Next() {
 		var h model.Habit
 		var categoryID, catID sql.NullInt64
-		var catName, catColor sql.NullString
+		var catName, catColor, catEmoji sql.NullString
 		var archivedAt sql.NullTime
 
 		err := rows.Scan(
-			&h.ID, &h.Name, &h.Description, &categoryID, &h.FrequencyType,
-			&h.FrequencyValue, &h.CreatedAt, &archivedAt,
-			&catID, &catName, &catColor,
+			&h.ID, &h.Name, &h.Description, &h.Emoji, &categoryID, &h.FrequencyType,
+			&h.FrequencyValue, &h.TargetPerDay, &h.CreatedAt, &archivedAt,
+			&catID, &catName, &catColor, &catEmoji,
 		)
 		if err != nil {
 			return nil, err
@@ -79,18 +80,20 @@ func (s *Service) GetHabitsForToday() ([]HabitWithStatus, error) {
 				ID:    catID.Int64,
 				Name:  catName.String,
 				Color: catColor.String,
+				Emoji: catEmoji.String,
 			}
 		}
 
 		// Get completion status
-		completed, _ := s.repo.IsCompletedOn(h.ID, today)
+		completionsToday, _ := s.repo.CountCompletionsOn(h.ID, today)
 		completionsThisWeek, _ := s.repo.CountCompletionsThisWeek(h.ID)
 		currentStreak, _ := s.repo.CalculateCurrentStreak(h.ID)
 		bestStreak, _ := s.repo.CalculateBestStreak(h.ID)
 
 		status := HabitWithStatus{
 			Habit:               h,
-			CompletedToday:      completed,
+			CompletedToday:      completionsToday >= h.TargetPerDay,
+			CompletionsToday:    completionsToday,
 			CurrentStreak:       currentStreak,
 			BestStreak:          bestStreak,
 			CompletionsThisWeek: completionsThisWeek,
@@ -104,14 +107,15 @@ func (s *Service) GetHabitsForToday() ([]HabitWithStatus, error) {
 }
 
 // ToggleCompletion toggles the completion status for today
+// If there are any completions, it removes one. Otherwise, it adds one.
 func (s *Service) ToggleCompletion(habitID int64) (bool, error) {
 	today := time.Now()
-	completed, err := s.repo.IsCompletedOn(habitID, today)
+	count, err := s.repo.CountCompletionsOn(habitID, today)
 	if err != nil {
 		return false, err
 	}
 
-	if completed {
+	if count > 0 {
 		err = s.repo.Uncomplete(habitID, today)
 		return false, err
 	}
