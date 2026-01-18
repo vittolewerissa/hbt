@@ -241,7 +241,7 @@ func (m Model) renderWithModal() string {
 			),
 		)
 
-	// Get the modal content based on active tab
+	// Get the modal content based on active tab (just the box, no placement)
 	var modalContent string
 	if m.activeTab == TabCategories {
 		modalContent = m.categoriesModel.RenderModalContent()
@@ -249,22 +249,19 @@ func (m Model) renderWithModal() string {
 		modalContent = m.habitsModel.RenderModalContent()
 	}
 
-	// Overlay the modal on the full screen
+	// Overlay the modal box onto the base view
 	return m.overlayModalOnBase(baseView, modalContent)
 }
 
 func (m Model) overlayModalOnBase(base, modal string) string {
-	// Split into lines
 	baseLines := strings.Split(base, "\n")
 	modalLines := strings.Split(modal, "\n")
 
-	// Calculate center position for modal
-	startRow := (len(baseLines) - len(modalLines)) / 2
-	if startRow < 0 {
-		startRow = 0
-	}
+	// Calculate dimensions
+	baseHeight := len(baseLines)
+	modalHeight := len(modalLines)
 
-	// Get the width of the base view (use first non-empty line)
+	// Find the widest base line (for horizontal centering calculation)
 	var baseWidth int
 	for _, line := range baseLines {
 		w := lipgloss.Width(line)
@@ -273,30 +270,117 @@ func (m Model) overlayModalOnBase(base, modal string) string {
 		}
 	}
 
-	// For each modal line, overlay it on the corresponding base line
-	for i, modalLine := range modalLines {
-		targetRow := startRow + i
-		if targetRow >= 0 && targetRow < len(baseLines) {
-			modalWidth := lipgloss.Width(modalLine)
-
-			// Center the modal line and pad to full width
-			leftPadding := (baseWidth - modalWidth) / 2
-			if leftPadding < 0 {
-				leftPadding = 0
-			}
-			rightPadding := baseWidth - modalWidth - leftPadding
-			if rightPadding < 0 {
-				rightPadding = 0
-			}
-
-			// Create centered line
-			centeredLine := strings.Repeat(" ", leftPadding) + modalLine + strings.Repeat(" ", rightPadding)
-
-			baseLines[targetRow] = centeredLine
+	// Find modal width
+	var modalWidth int
+	for _, line := range modalLines {
+		w := lipgloss.Width(line)
+		if w > modalWidth {
+			modalWidth = w
 		}
 	}
 
-	return strings.Join(baseLines, "\n")
+	// Calculate centered position
+	startRow := (baseHeight - modalHeight) / 2
+	if startRow < 0 {
+		startRow = 0
+	}
+	startCol := (baseWidth - modalWidth) / 2
+	if startCol < 0 {
+		startCol = 0
+	}
+
+	// Start with a copy of base
+	result := make([]string, baseHeight)
+	copy(result, baseLines)
+
+	// Overlay modal lines onto result
+	for i, modalLine := range modalLines {
+		targetRow := startRow + i
+		if targetRow >= 0 && targetRow < baseHeight {
+			baseLine := result[targetRow]
+
+			// We need to insert modalLine at startCol visible position in baseLine
+			// This requires ANSI-aware string manipulation
+
+			// Get visible width of base line
+			baseLineWidth := lipgloss.Width(baseLine)
+
+			// Calculate how much of the base line to keep before and after modal
+			// We'll split the base line into: [left part] [modal] [right part]
+
+			// Build the new line by concatenating visible character ranges
+			var newLine string
+
+			// Add left part (0 to startCol visible chars)
+			if startCol > 0 {
+				newLine += m.getVisibleSubstring(baseLine, 0, startCol)
+			}
+
+			// Add modal content
+			newLine += modalLine
+
+			// Add right part (startCol+modalWidth to end)
+			rightStart := startCol + lipgloss.Width(modalLine)
+			if rightStart < baseLineWidth {
+				newLine += m.getVisibleSubstring(baseLine, rightStart, baseLineWidth)
+			}
+
+			result[targetRow] = newLine
+		}
+	}
+
+	return strings.Join(result, "\n")
+}
+
+// getVisibleSubstring extracts a substring based on visible character positions (ANSI-aware)
+// from position start (inclusive) to end (exclusive) in visible character count
+func (m Model) getVisibleSubstring(s string, start, end int) string {
+	if start >= end {
+		return ""
+	}
+
+	// Use lipgloss.Width to measure visible width as we iterate through runes
+	// This is a simplified approach - it strips ANSI codes and works with visible chars
+
+	// For a more robust solution, we'd need ansi-aware truncation
+	// For now, use a simple approach: iterate through the string and track visible position
+
+	var result strings.Builder
+	visiblePos := 0
+	inEscape := false
+
+	for _, r := range s {
+		// Track ANSI escape sequences
+		if r == '\x1b' {
+			inEscape = true
+		}
+
+		if inEscape {
+			result.WriteRune(r)
+			if r == 'm' {
+				inEscape = false
+			}
+			continue
+		}
+
+		// Regular character
+		if visiblePos >= start && visiblePos < end {
+			result.WriteRune(r)
+		}
+		visiblePos++
+
+		// If we've reached the end position, we can keep copying ANSI codes
+		// but stop adding visible characters
+		if visiblePos >= end {
+			// Continue to preserve any remaining ANSI sequences that might reset styles
+			if r == '\x1b' {
+				inEscape = true
+				result.WriteRune(r)
+			}
+		}
+	}
+
+	return result.String()
 }
 
 func (m Model) renderTabBar(width int) string {
